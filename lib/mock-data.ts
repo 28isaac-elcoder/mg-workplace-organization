@@ -73,8 +73,12 @@ export const mockProjects: ProjectDetail[] = [
         title: "Scope clarification",
         content: "Client confirmed they want county-level only for phase 1.",
         createdAt: "2026-03-05T12:00:00Z",
+        category: "general_note",
+        otherCategory: null,
+        relevantDate: null,
       },
     ],
+    nextRelevantNoteDate: null,
   },
   {
     id: "demo-workforce-dashboard",
@@ -131,5 +135,6 @@ export const mockProjects: ProjectDetail[] = [
       },
     ],
     projectNotes: [],
+    nextRelevantNoteDate: null,
   },
 ];

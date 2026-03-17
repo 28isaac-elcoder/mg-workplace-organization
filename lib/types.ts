@@ -26,10 +26,20 @@ export const UPDATE_FIELDS = [
   "Next Action",
 ] as const;
 
+export const NOTE_CATEGORIES = [
+  "general_note",
+  "update",
+  "milestone",
+  "immediate_todo",
+  "general_todo",
+  "other",
+] as const;
+
 export type Priority = (typeof PRIORITIES)[number];
 export type Status = (typeof STATUSES)[number];
 export type ContactRole = (typeof CONTACT_ROLES)[number];
 export type UpdateField = (typeof UPDATE_FIELDS)[number];
+export type ProjectNoteCategory = (typeof NOTE_CATEGORIES)[number];
 
 export type Contact = {
   id: string;
@@ -71,6 +81,9 @@ export type ProjectNote = {
   title: string;
   content: string | null;
   createdAt: string;
+   category: ProjectNoteCategory;
+   otherCategory: string | null;
+   relevantDate: string | null;
 };
 
 export type ProjectSummary = {
@@ -88,6 +101,7 @@ export type ProjectSummary = {
   nextAction: string | null;
   requestors: string[];
   tools: string[];
+  nextRelevantNoteDate: string | null;
 };
 
 export type ProjectDetail = ProjectSummary & {

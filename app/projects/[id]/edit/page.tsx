@@ -1,11 +1,8 @@
 import Link from "next/link";
 
-import { updateProjectAction } from "@/app/projects/actions";
 import { ContactList } from "@/components/contact-list";
-import { MilestoneList } from "@/components/milestone-list";
-import { ProjectForm } from "@/components/project-form";
+import { EditProjectAutosaveForm } from "@/components/edit-project-autosave-form";
 import { ProjectNotesInline } from "@/components/project-notes-list";
-import { UpdateLog } from "@/components/update-log";
 import { getProjectById } from "@/lib/projects";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { formatDate, getDueState, priorityClass, statusClass } from "@/lib/utils";
@@ -98,7 +95,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
 
       <section className="card">
         <h2>Edit project</h2>
-        <ProjectForm action={updateProjectAction} project={project} submitLabel="Save changes" />
+        <EditProjectAutosaveForm project={project} disabled={disabled} />
       </section>
 
       {disabled ? (
@@ -106,11 +103,6 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
           <p>Demo mode is active. Add your Supabase variables to enable saving from the forms below.</p>
         </section>
       ) : null}
-
-      <div className="detail-layout">
-        <MilestoneList projectId={project.id} milestones={project.milestones} disabled={disabled} />
-        <UpdateLog projectId={project.id} updates={project.updates} disabled={disabled} />
-      </div>
 
       <ContactList projectId={project.id} contacts={project.contacts} disabled={disabled} />
     </div>

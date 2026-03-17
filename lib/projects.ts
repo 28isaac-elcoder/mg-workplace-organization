@@ -83,6 +83,11 @@ type ProjectNoteRow = {
   created_at: string;
 };
 
+type ProjectNoteDateRow = {
+  project_id: string;
+  relevant_date: string | null;
+};
+
 function toSummary(
   row: ProjectRow,
   requestors: string[],
@@ -153,6 +158,10 @@ function toProjectNote(row: ProjectNoteRow): ProjectNote {
     title: row.title,
     content: row.content,
     createdAt: row.created_at,
+    // New fields will be populated where available; fallback keeps demo mode resilient.
+    category: (row as any).category ?? "general_note",
+    otherCategory: (row as any).other_category ?? null,
+    relevantDate: (row as any).relevant_date ?? null,
   };
 }
 
@@ -219,6 +228,7 @@ export async function getProjects(filters: ProjectFilters = {}) {
         nextAction: project.nextAction,
         requestors: project.requestors,
         tools: project.tools,
+        nextRelevantNoteDate: (project as any).nextRelevantNoteDate ?? null,
       })),
       filters,
     );
@@ -241,7 +251,7 @@ export async function getProjects(filters: ProjectFilters = {}) {
   const projects = (projectRows ?? []) as ProjectRow[];
   const ids = projects.map((project) => project.id);
 
-  const [requestorRes, toolRes] = await Promise.all([
+  const [requestorRes, toolRes, notesDatesRes] = await Promise.all([
     supabase
       .from("project_requestors")
       .select("project_id, requestors(name)")
@@ -250,10 +260,27 @@ export async function getProjects(filters: ProjectFilters = {}) {
       .from("project_tools")
       .select("project_id, tools(name)")
       .in("project_id", ids.length > 0 ? ids : ["00000000-0000-0000-0000-000000000000"]),
+    supabase
+      .from("project_notes")
+      .select("project_id,relevant_date")
+      .in("project_id", ids.length > 0 ? ids : ["00000000-0000-0000-0000-000000000000"])
+      .gte("relevant_date", new Date().toISOString().slice(0, 10))
+      .order("relevant_date", { ascending: true }),
   ]);
 
   if (requestorRes.error) throw new Error(requestorRes.error.message);
   if (toolRes.error) throw new Error(toolRes.error.message);
+  // If project_notes or relevant_date doesn't exist yet, treat as no upcoming dates.
+  const noteDatesRows: ProjectNoteDateRow[] =
+    notesDatesRes.error || !notesDatesRes.data ? [] : ((notesDatesRes.data ?? []) as ProjectNoteDateRow[]);
+
+  const nextRelevantNoteDateByProject = new Map<string, string>();
+  for (const row of noteDatesRows) {
+    if (!row.relevant_date) continue;
+    if (!nextRelevantNoteDateByProject.has(row.project_id)) {
+      nextRelevantNoteDateByProject.set(row.project_id, row.relevant_date);
+    }
+  }
 
   const requestorsByProject = new Map<string, string[]>();
   for (const row of (requestorRes.data ?? []) as RequestorJoinRow[]) {
@@ -271,11 +298,14 @@ export async function getProjects(filters: ProjectFilters = {}) {
 
   return applyFilters(
     projects.map((project) =>
-      toSummary(
-        project,
-        requestorsByProject.get(project.id) ?? [],
-        toolsByProject.get(project.id) ?? [],
-      ),
+      ({
+        ...toSummary(
+          project,
+          requestorsByProject.get(project.id) ?? [],
+          toolsByProject.get(project.id) ?? [],
+        ),
+        nextRelevantNoteDate: nextRelevantNoteDateByProject.get(project.id) ?? null,
+      }) as ProjectSummary,
     ),
     filters,
   );
@@ -323,7 +353,7 @@ export async function getProjectById(id: string): Promise<ProjectDetail> {
       .order("name", { ascending: true }),
     supabase
       .from("project_notes")
-      .select("id,project_id,title,content,created_at")
+      .select("id,project_id,title,content,created_at,category,other_category,relevant_date")
       .eq("project_id", id)
       .order("created_at", { ascending: false }),
   ]);

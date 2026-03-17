@@ -357,12 +357,15 @@ textarea:focus {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  /* Enable container queries based on this card's width */
+  container-type: inline-size;
+  container-name: projects-table;
 }
 
 .projects-table-header,
 .projects-table-row {
   display: grid;
-  grid-template-columns: minmax(0, 2.5fr) repeat(5, minmax(0, 1.1fr)) 0.6fr;
+  grid-template-columns: minmax(0, 2.5fr) minmax(0, 1.3fr) minmax(0, 2fr) minmax(0, 1.2fr);
   align-items: center;
   column-gap: 0.75rem;
 }
@@ -370,7 +373,7 @@ textarea:focus {
 .projects-table-header {
   padding-bottom: 0.35rem;
   border-bottom: 1px solid var(--border-strong);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--muted);
@@ -388,7 +391,7 @@ textarea:focus {
 .projects-table-row {
   padding: 0.55rem 0.35rem;
   border-bottom: 1px solid var(--border);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   text-decoration: none;
   color: inherit;
 }
@@ -409,6 +412,12 @@ textarea:focus {
 
 .projects-table-title {
   font-weight: 600;
+  font-size: 0.98rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
 }
 
 .projects-table-sub {
@@ -418,6 +427,93 @@ textarea:focus {
 
 .projects-table-percent {
   text-align: right;
+}
+
+.projects-table-date-short {
+  display: none;
+}
+
+.projects-table-date-long {
+  display: inline;
+}
+
+.projects-table-next-note {
+  display: block;
+  font-size: 0.75em;
+  color: var(--muted);
+  margin-top: 0.15rem;
+}
+
+.projects-table-priority-status-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.projects-table-priority-status-desktop {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.projects-table-priority-status-mobile {
+  display: none;
+}
+
+/* Slightly softer, smaller badges inside the project list so they don't overpower text. */
+.projects-table .badge {
+  font-size: 0.78em;
+  padding: 0.25rem 0.55rem;
+  opacity: 0.94;
+}
+
+.projects-table-col-next-date {
+  text-align: left;
+  font-size: 0.9em;
+  color: var(--muted);
+}
+
+/* Container-query-driven typography for the projects table */
+@container projects-table (max-width: 480px) {
+  .projects-table-header {
+    font-size: 0.7rem;
+  }
+
+  .projects-table-row {
+    font-size: 0.8rem;
+  }
+
+  .projects-table-title {
+    font-size: 0.88rem;
+  }
+}
+
+@container projects-table (min-width: 480px) and (max-width: 840px) {
+  .projects-table-header {
+    font-size: 0.78rem;
+  }
+
+  .projects-table-row {
+    font-size: 0.9rem;
+  }
+
+  .projects-table-title {
+    font-size: 1rem;
+  }
+}
+
+@container projects-table (min-width: 840px) {
+  .projects-table-header {
+    font-size: 0.9rem;
+  }
+
+  .projects-table-row {
+    font-size: 1rem;
+  }
+
+  .projects-table-title {
+    font-size: 1.1rem;
+  }
 }
 
 .progress-row {
@@ -456,8 +552,8 @@ textarea:focus {
 }
 
 .badge-medium {
-  background: #fff3da;
-  color: #8b6300;
+  background: #eceff3;
+  color: #444b59;
 }
 
 .badge-high {
@@ -466,8 +562,8 @@ textarea:focus {
 }
 
 .badge-urgent {
-  background: #ffe0de;
-  color: #a22d24;
+  background: #111111;
+  color: #ffffff;
 }
 
 .badge-success {
@@ -550,5 +646,70 @@ textarea:focus {
   .section-header {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+@media (max-width: 720px) {
+  .projects-table-header,
+  .projects-table-row {
+    /* Give the Priority/Status column more room on small screens */
+    grid-template-columns: minmax(0, 2.1fr) minmax(0, 1.1fr) minmax(0, 1.8fr);
+    column-gap: 0.6rem;
+  }
+
+  .projects-table-header span,
+  .projects-table-row span {
+    min-width: 0;
+  }
+
+  .projects-table-main {
+    gap: 0.1rem;
+  }
+
+  .projects-table-col-next-date {
+    display: none;
+  }
+
+  .projects-table-priority-status-desktop {
+    display: none;
+  }
+
+  .projects-table-priority-status-mobile {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* Prevent the combined Priority/Status badge from overflowing its pill on narrow screens. */
+  .projects-table-priority-status-mobile > .badge {
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.78em;
+    padding: 0.22rem 0.5rem;
+  }
+
+  .projects-table-date-long {
+    display: none;
+  }
+
+  .projects-table-date-short {
+    display: inline;
+  }
+
+  /* Keep badge text on one line; shrink typography instead of wrapping. */
+  .badge {
+    font-size: clamp(0.64rem, 2.1vw, 0.76rem);
+    padding: 0.2rem 0.38rem;
+    line-height: 1.05;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 460px) {
+  /* Extra-thin screens: shrink even further to avoid collisions. */
+  .badge {
+    font-size: clamp(0.6rem, 2vw, 0.7rem);
+    padding: 0.18rem 0.34rem;
   }
 }

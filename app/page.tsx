@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { getProjects } from "@/lib/projects";
 import { isSupabaseConfigured } from "@/lib/supabase";
-import { formatDate, getDueState, priorityClass, statusClass } from "@/lib/utils";
+import { formatDate, formatDateShort, getDueState, priorityClass, statusClass } from "@/lib/utils";
 
 export default async function HomePage() {
   const projects = await getProjects();
@@ -61,10 +61,7 @@ export default async function HomePage() {
           <span className="projects-table-header-main">Project</span>
           <span>Due</span>
           <span>Priority</span>
-          <span>Status</span>
-          <span>Requestors</span>
-          <span>Tools</span>
-          <span>%</span>
+          <span className="projects-table-col-next-date">Next date</span>
         </div>
         <div className="projects-table-body">
           {projects.length === 0 ? (
@@ -80,20 +77,26 @@ export default async function HomePage() {
                 >
                   <div className="projects-table-main">
                     <span className="projects-table-title">{project.title}</span>
-                    <span className="projects-table-sub">
-                      {project.departmentClient ?? "No department or client set"}
-                    </span>
                   </div>
-                  <span>{formatDate(project.primaryDueDate)}</span>
                   <span>
-                    <span className={priorityClass(project.priority)}>{project.priority}</span>
+                    <span className="projects-table-date-long">{formatDate(project.primaryDueDate)}</span>
+                    <span className="projects-table-date-short">{formatDateShort(project.primaryDueDate)}</span>
                   </span>
-                  <span>
-                    <span className={statusClass(project.status)}>{project.status}</span>
+                  <span className="projects-table-priority-status-cell">
+                    <span className="projects-table-priority-status-desktop">
+                      <span className={priorityClass(project.priority)}>{project.priority}</span>
+                    </span>
+                    <span className="projects-table-priority-status-mobile">
+                      <span className={priorityClass(project.priority)}>
+                        {project.nextRelevantNoteDate
+                          ? `${project.priority} / ${formatDateShort(project.nextRelevantNoteDate)}`
+                          : project.priority}
+                      </span>
+                    </span>
                   </span>
-                  <span>{project.requestors.length ? project.requestors.join(", ") : "—"}</span>
-                  <span>{project.tools.length ? project.tools.join(", ") : "—"}</span>
-                  <span className="projects-table-percent">{project.percentComplete}%</span>
+                  <span className="projects-table-col-next-date">
+                    {project.nextRelevantNoteDate ? formatDateShort(project.nextRelevantNoteDate) : "—"}
+                  </span>
                 </Link>
               );
             })

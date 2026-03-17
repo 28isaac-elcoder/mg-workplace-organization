@@ -108,7 +108,7 @@ export async function createProjectAction(formData: FormData) {
   redirect(`/projects/${project.id}/edit`);
 }
 
-export async function updateProjectAction(formData: FormData) {
+async function updateProjectInternal(formData: FormData) {
   const supabase = ensureSupabase();
   const projectId = String(formData.get("projectId") ?? "");
 
@@ -172,9 +172,19 @@ export async function updateProjectAction(formData: FormData) {
     if (joinError) throw new Error(joinError.message);
   }
 
+  return projectId;
+}
+
+export async function updateProjectAction(formData: FormData) {
+  const projectId = await updateProjectInternal(formData);
   revalidatePath("/projects");
   revalidatePath(`/projects/${projectId}`);
   redirect(`/projects/${projectId}`);
+}
+
+export async function autosaveProjectAction(formData: FormData) {
+  const projectId = await updateProjectInternal(formData);
+  await Promise.all([revalidatePath("/projects"), revalidatePath(`/projects/${projectId}`)]);
 }
 
 export async function createMilestoneAction(formData: FormData) {
@@ -248,10 +258,17 @@ export async function createProjectNoteAction(formData: FormData) {
   const supabase = ensureSupabase();
   const projectId = String(formData.get("projectId") ?? "");
 
+  const category = String(formData.get("category") ?? "general_note");
+  const otherCategory = parseNullableString(formData.get("otherCategory"));
+  const relevantDate = parseNullableString(formData.get("relevantDate"));
+
   const { error } = await supabase.from("project_notes").insert({
     project_id: projectId,
     title: String(formData.get("title") ?? "").trim(),
     content: parseNullableString(formData.get("content")),
+    category,
+    other_category: category === "other" ? otherCategory : null,
+    relevant_date: relevantDate,
   });
 
   if (error) {

@@ -16,6 +16,16 @@ export function formatDate(value: string | null | undefined) {
   }).format(new Date(safeValue));
 }
 
+export function formatDateShort(value: string | null | undefined) {
+  if (!value) return "Not set";
+  const safeValue = value.length <= 10 ? `${value}T00:00:00` : value;
+  return new Intl.DateTimeFormat("en-US", {
+    month: "numeric",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(safeValue));
+}
+
 export function toDateInputValue(value: string | null | undefined) {
   if (!value) return "";
   return value.slice(0, 10);

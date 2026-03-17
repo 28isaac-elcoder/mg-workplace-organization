@@ -13,6 +13,12 @@ export function ProjectForm({ action, project, submitLabel }: ProjectFormProps) 
     <form action={action} className="stack-lg">
       {project ? <input type="hidden" name="projectId" value={project.id} /> : null}
 
+      <div className="form-actions">
+        <button className="button button-primary" type="submit">
+          {submitLabel}
+        </button>
+      </div>
+
       <div className="grid-two">
         <label className="field">
           <span>Project title</span>
