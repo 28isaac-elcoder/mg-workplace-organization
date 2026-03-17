@@ -108,6 +108,7 @@ function toSummary(
     nextAction: row.next_action,
     requestors,
     tools,
+    nextRelevantNoteDate: null,
   };
 }
 
